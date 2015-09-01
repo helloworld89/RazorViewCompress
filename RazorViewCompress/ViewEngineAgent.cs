@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace RazorViewCompress
 {
-    public class ViewEngineAgent : IViewEngine
+    internal class ViewEngineAgent : IViewEngine
     {
         private readonly IViewEngine _innerViewEngine;
         public ViewEngineAgent()

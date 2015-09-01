@@ -7,19 +7,18 @@ using System.Web.Mvc;
 
 namespace RazorViewCompress
 {
-
-    public class CompressFilter : ActionFilterAttribute
+    internal class CompressFilter : ActionFilterAttribute
     {
-        bool _zipValue;
+        bool _zipHtml;
         bool _removeWhiteSpace;
-        public CompressFilter(bool zipValue, bool removeWhiteSpace)
+        public CompressFilter(bool zipHtml, bool removeWhiteSpace)
         {
-            _zipValue = zipValue;
+            _zipHtml = zipHtml;
             _removeWhiteSpace = removeWhiteSpace;
         }
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            if (_zipValue)
+            if (_zipHtml)
             {
                 GZip(filterContext);
             }

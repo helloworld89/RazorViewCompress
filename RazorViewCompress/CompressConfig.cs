@@ -4,16 +4,16 @@ namespace RazorViewCompress
 {
     public class CompressConfig
     {
-        public static void Config(bool removeWhiteSpaceInRazor, bool removeWhiteSpaceWhenReturn, bool zipResult)
+        public static void Config(bool removeWhiteSpaceInRazor, bool removeWhiteSpaceInHtml, bool zipHtml)
         {
             if (removeWhiteSpaceInRazor)
             {
                 ViewEngines.Engines.Clear();
                 ViewEngines.Engines.Add(new ViewEngineAgent());
             }
-            if (removeWhiteSpaceWhenReturn || zipResult)
+            if (removeWhiteSpaceInHtml || zipHtml)
             {
-                GlobalFilters.Filters.Add(new CompressFilter(zipResult, removeWhiteSpaceWhenReturn));
+                GlobalFilters.Filters.Add(new CompressFilter(zipHtml, removeWhiteSpaceInHtml));
             }
         }
     }
