@@ -4,7 +4,7 @@ namespace RazorViewCompress
 {
     public class CompressConfig
     {
-        public CompressConfig(bool removeWhiteSpaceInRazor, bool removeWhiteSpaceWhenReturn, bool zipResult)
+        public static void Config(bool removeWhiteSpaceInRazor, bool removeWhiteSpaceWhenReturn, bool zipResult)
         {
             if (removeWhiteSpaceInRazor)
             {
