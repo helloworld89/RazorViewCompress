@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompressConfig.cs" />
     <Compile Include="CompressFilter.cs" />
     <Compile Include="RazorCompressHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

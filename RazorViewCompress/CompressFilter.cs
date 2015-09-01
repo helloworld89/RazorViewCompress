@@ -10,12 +10,23 @@ namespace RazorViewCompress
 
     public class CompressFilter : ActionFilterAttribute
     {
-
+        bool _zipValue;
+        bool _removeWhiteSpace;
+        public CompressFilter(bool zipValue, bool removeWhiteSpace)
+        {
+            _zipValue = zipValue;
+            _removeWhiteSpace = removeWhiteSpace;
+        }
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-
-            GZip(filterContext);
-            White(filterContext);
+            if (_zipValue)
+            {
+                GZip(filterContext);
+            }
+            if (_removeWhiteSpace)
+            {
+                White(filterContext);
+            }
         }
 
         private void GZip(ActionExecutingContext filterContext)
