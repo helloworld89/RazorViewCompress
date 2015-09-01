@@ -8,7 +8,7 @@ using System.Web.Mvc;
 
 namespace RazorViewCompress
 {
-    internal static class CompressHelper
+    internal static class RazorCompressHelper
     {
         private static string[] viewLocationFormats = new string[] {
             "~/Views/{1}/{0}.cshtml",

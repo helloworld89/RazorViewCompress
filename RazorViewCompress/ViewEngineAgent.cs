@@ -17,7 +17,7 @@ namespace RazorViewCompress
         }
         public ViewEngineResult FindPartialView(ControllerContext controllerContext, string partialViewName, bool useCache)
         {
-            partialViewName = CompressHelper.GetCompressedViewName(controllerContext, partialViewName);
+            partialViewName = RazorCompressHelper.GetCompressedViewName(controllerContext, partialViewName);
 
             var result = _innerViewEngine.FindPartialView(controllerContext, partialViewName, useCache);
             return result;
@@ -28,8 +28,8 @@ namespace RazorViewCompress
             {
                 masterName = masterName == string.Empty ? "_Layout" : masterName;
             }
-            masterName = CompressHelper.GetCompressedViewName(controllerContext, masterName);
-            viewName = CompressHelper.GetCompressedViewName(controllerContext, viewName);
+            masterName = RazorCompressHelper.GetCompressedViewName(controllerContext, masterName);
+            viewName = RazorCompressHelper.GetCompressedViewName(controllerContext, viewName);
 
             var result = _innerViewEngine.FindView(controllerContext, viewName, masterName, useCache);
             return result;
