@@ -57,13 +57,6 @@ namespace RazorViewCompress
             {
                 s = Regex.Replace(s, @">\s+<", "><");
                 s = Regex.Replace(s, @"\r\n\s{0,}", " ");
-                // single-line doctype must be preserved 
-                var firstEndBracketPosition = s.IndexOf(">");
-                //if (firstEndBracketPosition >= 0)
-                //{
-                //    s = s.Remove(firstEndBracketPosition, 1);
-                //    s = s.Insert(firstEndBracketPosition, ">");
-                //}
                 return s;
             });
         }

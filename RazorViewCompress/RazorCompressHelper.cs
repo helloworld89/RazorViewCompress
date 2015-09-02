@@ -72,6 +72,7 @@ namespace RazorViewCompress
 
         private static bool NeedCompress(string filePath, string outputPath)
         {
+            return true;
             if (!File.Exists(outputPath))
             {
                 return true;
@@ -85,6 +86,13 @@ namespace RazorViewCompress
 
             fileContent = Regex.Replace(fileContent, @">\s+<", "><");
             fileContent = Regex.Replace(fileContent, @"\r\n\s{0,}", " ");
+            Regex r = new Regex(@"@model\s{1,}[A-Za-z.]{1,}");
+            var match=r.Match(fileContent);
+            if (match.Success)
+            {
+                fileContent = fileContent.Replace(match.Value, match.Value + "\r\n");
+            }
+            fileContent = Regex.Replace(fileContent, @"(?<=(@model\s{1,}[A-Za-z.]{1,}))\s(1,)(?=\s)", @"\r\n");
 
             using (var fileStream = File.Create(compressedFilePath))
             {
