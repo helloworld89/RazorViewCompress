@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -11,6 +12,13 @@ namespace RazorViewCompress
     {
         bool _zipHtml;
         bool _removeWhiteSpace;
+        public override void OnResultExecuted(ResultExecutedContext filterContext)
+        {
+            if (filterContext.Exception != null)
+            {
+                filterContext.HttpContext.Response.Filter = null;
+            }
+        }
         public CompressFilter(bool zipHtml, bool removeWhiteSpace)
         {
             _zipHtml = zipHtml;
@@ -24,12 +32,23 @@ namespace RazorViewCompress
             }
             if (_removeWhiteSpace)
             {
-                White(filterContext);
+                RemoveWhiteSpaces(filterContext);
             }
+            EventHandler errorHandler = null;
+            errorHandler = delegate
+            {
+                filterContext.HttpContext.Response.Filter = null;
+                if (filterContext.HttpContext.ApplicationInstance != null)
+                {
+                    filterContext.HttpContext.ApplicationInstance.Error -= errorHandler;
+                }
+            };
+            filterContext.HttpContext.ApplicationInstance.Error += errorHandler;
         }
 
         private void GZip(ActionExecutingContext filterContext)
         {
+
 
             var encodingsAccepted = filterContext.HttpContext.Request.Headers["Accept-Encoding"];
             if (string.IsNullOrEmpty(encodingsAccepted)) return;
@@ -48,18 +67,51 @@ namespace RazorViewCompress
                 response.Filter = new GZipStream(response.Filter, CompressionMode.Compress);
             }
         }
-        private void White(ActionExecutingContext filterContext)
+        private void RemoveWhiteSpaces(ActionExecutingContext filterContext)
         {
-            var request = filterContext.HttpContext.Request;
             var response = filterContext.HttpContext.Response;
 
             response.Filter = new WhiteSpaceFilter(response.Filter, s =>
             {
-                s = Regex.Replace(s, @">\s+<", "><");
-                s = Regex.Replace(s, @"\r\n\s{0,}", " ");
-                return s;
+                return HanldePre(s, RemoveWhiteSpaces);
             });
         }
+        private string RemoveWhiteSpaces(string s)
+        {
+            s = Regex.Replace(s, @">\s+<", "><");
+            s = Regex.Replace(s, @"\r\n\s{0,}", " ");
+            return s;
+        }
+        private string HanldePre(string s, Func<string, string> action)
+        {
+            List<string> pres = new List<string>();
+            var preStartIndex = 0;
+            var preEndIndex = 0;
+            var preStartMark = "<pre>";
+            var preEndMark = "</pre>";
+            while (s.IndexOf(preStartMark, preEndIndex) > -1)
+            {
+                preStartIndex = s.IndexOf(preStartMark, preEndIndex);
+                preEndIndex = s.IndexOf(preEndMark, preStartIndex) + 6;
+                pres.Add(s.Substring(preStartIndex, preEndIndex - preStartIndex));
+            }
+
+            s = action(s);
+
+            preStartIndex = 0;
+            preEndIndex = 0;
+            int commentIndex = 0;
+            while (s.IndexOf(preStartMark, preEndIndex) > -1)
+            {
+                preStartIndex = s.IndexOf(preStartMark, preEndIndex);
+                preEndIndex = s.IndexOf(preEndMark, preStartIndex) + 6;
+                s = s.Replace(s.Substring(preStartIndex, preEndIndex - preStartIndex), string.Format("\r\n{0}\r\n", pres[commentIndex]));
+                commentIndex++;
+            }
+            return s;
+        }
+
+
 
         internal class WhiteSpaceFilter : Stream
         {

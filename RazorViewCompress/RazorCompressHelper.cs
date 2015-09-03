@@ -14,34 +14,41 @@ namespace RazorViewCompress
             "~/Views/{1}/{0}.cshtml",
             "~/Views/{1}/{0}.vbhtml",
             "~/Views/Shared/{0}.cshtml",
-             "~/Views/Shared/{0}.vbhtml" 
+             "~/Views/Shared/{0}.vbhtml"
         };
         private static string[] areaViewLocationFormats = new string[] {
              "~/Areas/{2}/Views/{1}/{0}.cshtml",
             "~/Areas/{2}/Views/{1}/{0}.vbhtml",
              "~/Areas/{2}/Views/Shared/{0}.cshtml",
-             "~/Areas/{2}/Views/Shared/{0}.vbhtml" 
+             "~/Areas/{2}/Views/Shared/{0}.vbhtml"
         };
 
         public static string GetCompressedViewName(ControllerContext controllerContext, string viewName)
         {
             List<string> viewLocations = GetViewLocations(controllerContext, viewName);
-
-            foreach (string viewLocation in viewLocations)
+            try
             {
-                string filePath = controllerContext.HttpContext.Request.MapPath(viewLocation);
-                if (File.Exists(filePath))
+                foreach (string viewLocation in viewLocations)
                 {
-                    var compressedViewLocation = viewLocation.Insert(viewLocation.LastIndexOf('/') + 1, "Temp");
-                    var compressedFilePath = HttpContext.Current.Request.MapPath(compressedViewLocation);
+                    string filePath = controllerContext.HttpContext.Request.MapPath(viewLocation);
+                    if (File.Exists(filePath))
+                    {
+                        var compressedViewLocation = viewLocation.Insert(viewLocation.LastIndexOf('/') + 1, "Temp");
+                        var compressedFilePath = HttpContext.Current.Request.MapPath(compressedViewLocation);
 
-                    TryCompress(filePath, compressedFilePath);
-                    return "Temp" + viewName;
+                        TryCompress(filePath, compressedFilePath);
+                        return "Temp" + viewName;
+                    }
                 }
             }
-
-            //Find no exist file match the viewName in viewLocations 
+            catch (Exception e)
+            {
+                //Find no exist file match the viewName in viewLocations or has some exception with multiple thread write file
+                return viewName;
+            }
             return viewName;
+
+
         }
 
         private static List<string> GetViewLocations(ControllerContext controllerContext, string viewName)
@@ -72,28 +79,19 @@ namespace RazorViewCompress
 
         private static bool NeedCompress(string filePath, string outputPath)
         {
-            return true;
             if (!File.Exists(outputPath))
             {
                 return true;
             }
             return File.GetLastWriteTimeUtc(filePath) > File.GetLastWriteTimeUtc(outputPath);
         }
-
         private static void Compress(string filePath, string compressedFilePath)
         {
             var fileContent = File.ReadAllText(filePath);
 
-            fileContent = Regex.Replace(fileContent, @">\s+<", "><");
-            fileContent = Regex.Replace(fileContent, @"\r\n\s{0,}", " ");
-            Regex r = new Regex(@"@model\s{1,}[A-Za-z.]{1,}");
-            var match=r.Match(fileContent);
-            if (match.Success)
-            {
-                fileContent = fileContent.Replace(match.Value, match.Value + "\r\n");
-            }
-            fileContent = Regex.Replace(fileContent, @"(?<=(@model\s{1,}[A-Za-z.]{1,}))\s(1,)(?=\s)", @"\r\n");
-
+            fileContent= HanldePre(fileContent, GetCompressedString);
+            File.Delete(compressedFilePath);
+            
             using (var fileStream = File.Create(compressedFilePath))
             {
                 using (var txtWriter = new StreamWriter(fileStream, Encoding.UTF8))
@@ -101,6 +99,58 @@ namespace RazorViewCompress
                     txtWriter.WriteLine(fileContent);
                 }
             }
+            File.SetAttributes(compressedFilePath, FileAttributes.Hidden);
+        }
+
+        private static string HanldePre(string s, Func<string, string> action)
+        {
+            List<string> pres = new List<string>();
+            var preStartIndex = 0;
+            var preEndIndex = 0;
+            var preStartMark = "<pre>";
+            var preEndMark = "</pre>";
+            while (s.IndexOf(preStartMark, preEndIndex) > -1)
+            {
+                preStartIndex = s.IndexOf(preStartMark, preEndIndex);
+                preEndIndex = s.IndexOf(preEndMark, preStartIndex) + 6;
+                pres.Add(s.Substring(preStartIndex, preEndIndex - preStartIndex));
+            }
+
+            s = action(s);
+
+            preStartIndex = 0;
+            preEndIndex = 0;
+            int commentIndex = 0;
+            while (s.IndexOf(preStartMark, preEndIndex) > -1)
+            {
+                preStartIndex = s.IndexOf(preStartMark, preEndIndex);
+                preEndIndex = s.IndexOf(preEndMark, preStartIndex) + 6;
+                s = s.Replace(s.Substring(preStartIndex, preEndIndex - preStartIndex), string.Format("\r\n{0}\r\n", pres[commentIndex]));
+                commentIndex++;
+            }
+            return s;
+        }
+        private static string GetCompressedString(string fileContent)
+        {
+            Regex ra = new Regex(@"@:.*\r\n");
+            var matcha = ra.Match(fileContent);
+            if (matcha.Success)
+            {
+                fileContent = fileContent.Replace(matcha.Value, matcha.Value + "@/r/n@");
+            }
+
+            fileContent = Regex.Replace(fileContent, @">\s+<", "><");
+            fileContent = Regex.Replace(fileContent, @"\r\n\s{0,}", " ");
+
+            Regex r = new Regex(@"@model\s{1,}[0-9A-Za-z._]{1,}");
+            var match = r.Match(fileContent);
+            if (match.Success)
+            {
+                fileContent = fileContent.Replace(match.Value, match.Value + "\r\n");
+            }
+
+            fileContent = fileContent.Replace("@/r/n@", "\r\n");
+            return fileContent;
         }
 
         private static void CreateDirectory(string filePath)
