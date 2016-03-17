@@ -85,6 +85,7 @@ namespace RazorViewCompress
 
             fileContent = Regex.Replace(fileContent, @">\s+<", "><");
             fileContent = Regex.Replace(fileContent, @"\r\n\s{0,}", " ");
+            fileContent = Regex.Replace(fileContent, @"(@model[\t ]{1,}\S{1,})\s", "$1\r\n");
 
             using (var fileStream = File.Create(compressedFilePath))
             {
