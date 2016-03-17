@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 
@@ -22,6 +23,7 @@ namespace RazorViewCompress
              "~/Areas/{2}/Views/Shared/{0}.cshtml",
              "~/Areas/{2}/Views/Shared/{0}.vbhtml"
         };
+        private static string _fileNamePrefix = "CompressedTemp";
 
         public static string GetCompressedViewName(ControllerContext controllerContext, string viewName)
         {
@@ -33,11 +35,25 @@ namespace RazorViewCompress
                     string filePath = controllerContext.HttpContext.Request.MapPath(viewLocation);
                     if (File.Exists(filePath))
                     {
-                        var compressedViewLocation = viewLocation.Insert(viewLocation.LastIndexOf('/') + 1, "Temp");
+                        var compressedViewLocation = viewLocation.Insert(viewLocation.LastIndexOf('/') + 1, _fileNamePrefix);
                         var compressedFilePath = HttpContext.Current.Request.MapPath(compressedViewLocation);
+                        Mutex mutex = new Mutex(false, compressedFilePath.Replace(Path.DirectorySeparatorChar, '_'));
+                        try
+                        {
+                            mutex.WaitOne();
+                            TryCompress(filePath, compressedFilePath);
 
-                        TryCompress(filePath, compressedFilePath);
-                        return "Temp" + viewName;
+                        }
+                        catch (Exception)
+                        {
+
+                            throw;
+                        }
+                        finally
+                        {
+                            mutex.ReleaseMutex();
+                        }
+                        return _fileNamePrefix + viewName;
                     }
                 }
             }
@@ -94,6 +110,11 @@ namespace RazorViewCompress
             BaseCompressor compressor = compressorFactory.CreateCompressor();
             fileContent = compressor.Compress(fileContent);
 
+            WriteCompressedFile(fileContent, compressedFilePath);
+        }
+
+        private static void WriteCompressedFile(string fileContent, string compressedFilePath)
+        {
             File.Delete(compressedFilePath);
 
             using (var fileStream = File.Create(compressedFilePath))
