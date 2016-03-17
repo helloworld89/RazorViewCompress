@@ -44,10 +44,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compressor\BaseCompressor.cs" />
     <Compile Include="CompressConfig.cs" />
     <Compile Include="CompressFilter.cs" />
+    <Compile Include="Compressor\HtmlCompressor.cs" />
+    <Compile Include="Compressor\RazorCompressor.cs" />
+    <Compile Include="CompressorFactory\HtmlCompressorFactory.cs" />
+    <Compile Include="CompressorFactory\ICompressorFactory.cs" />
     <Compile Include="RazorCompressHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CompressorFactory\RazorCompressorFactory.cs" />
     <Compile Include="ViewEngineAgent.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
