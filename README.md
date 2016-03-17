@@ -17,3 +17,10 @@ Then view the source code in the browser, you will find page compressed.
 ## Note:
 * Work With MVC3 above
 * The default Layout name shouldn't be changed, or this can't find the layout page.
+
+##### Compressed Razor View
+![](https://github.com/helloworld89/RazorViewCompress/blob/master/Picture/CompressedRazorView.png)
+
+##### Compressed Html
+![](https://github.com/helloworld89/RazorViewCompress/blob/master/Picture/CompressedHtml.png)
+

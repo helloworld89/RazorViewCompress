@@ -6,7 +6,21 @@ using System.Runtime.InteropServices;
 // 特性集控制。更改这些特性值可修改
 // 与程序集关联的信息。
 [assembly: AssemblyTitle("RazorViewCompress")]
-[assembly: AssemblyDescription("Userd to remove white spaces in razor file")]
+[assembly: AssemblyDescription(@"
+Use to remove white spaces in razor.Work With MVC3 above
+
+How to use it：
+Insert codes below in Application_Start method in Global.asax file:
+
+RazorViewCompress.CompressConfig.Config(true, true, true);
+
+Each bool with different setting, you can adjust it as you like.
+
+Then view the source code in the browser, you will find page compressed.
+
+Note:
+the default Layout in _ViewStart.cshtml shouldn't be changed, or this can't find the layout page.")]
+
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("zhangzq")]
 [assembly: AssemblyProduct("RazorViewCompress")]
@@ -32,5 +46,5 @@ using System.Runtime.InteropServices;
 // 可以指定所有这些值，也可以使用“生成号”和“修订号”的默认值，
 // 方法是按如下所示使用“*”: 
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.2")]
-[assembly: AssemblyFileVersion("1.0.0.2")]
+[assembly: AssemblyVersion("1.0.0.9")]
+[assembly: AssemblyFileVersion("1.0.0.9")]
