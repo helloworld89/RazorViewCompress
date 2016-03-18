@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
 using System.Web.Mvc;
@@ -17,12 +16,14 @@ namespace RazorViewCompress
             "~/Views/Shared/{0}.cshtml",
              "~/Views/Shared/{0}.vbhtml"
         };
+
         private static string[] areaViewLocationFormats = new string[] {
              "~/Areas/{2}/Views/{1}/{0}.cshtml",
             "~/Areas/{2}/Views/{1}/{0}.vbhtml",
              "~/Areas/{2}/Views/Shared/{0}.cshtml",
              "~/Areas/{2}/Views/Shared/{0}.vbhtml"
         };
+
         private static string _fileNamePrefix = "CompressedTemp";
 
         public static string GetCompressedViewName(ControllerContext controllerContext, string viewName)
@@ -37,22 +38,9 @@ namespace RazorViewCompress
                     {
                         var compressedViewLocation = viewLocation.Insert(viewLocation.LastIndexOf('/') + 1, _fileNamePrefix);
                         var compressedFilePath = HttpContext.Current.Request.MapPath(compressedViewLocation);
-                        Mutex mutex = new Mutex(false, compressedFilePath.Replace(Path.DirectorySeparatorChar, '_'));
-                        try
-                        {
-                            mutex.WaitOne();
-                            TryCompress(filePath, compressedFilePath);
 
-                        }
-                        catch (Exception)
-                        {
+                        TryCompress(filePath, compressedFilePath);
 
-                            throw;
-                        }
-                        finally
-                        {
-                            mutex.ReleaseMutex();
-                        }
                         return _fileNamePrefix + viewName;
                     }
                 }
@@ -63,8 +51,6 @@ namespace RazorViewCompress
                 return viewName;
             }
             return viewName;
-
-
         }
 
         private static List<string> GetViewLocations(ControllerContext controllerContext, string viewName)
@@ -85,11 +71,22 @@ namespace RazorViewCompress
 
         private static void TryCompress(string filePath, string compressedFilePath)
         {
-
-            if (NeedCompress(filePath, compressedFilePath))
+            Mutex mutex = new Mutex(false, compressedFilePath.Replace(Path.DirectorySeparatorChar, '_'));
+            try
             {
-                //CreateDirectory(compressedFilePath);
-                Compress(filePath, compressedFilePath);
+                mutex.WaitOne();
+                if (NeedCompress(filePath, compressedFilePath))
+                {
+                    Compress(filePath, compressedFilePath);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                mutex.ReleaseMutex();
             }
         }
 

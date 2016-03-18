@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace RazorViewCompress
 {
-    public abstract class BaseCompressor
+    internal abstract class BaseCompressor
     {
         public string Compress(string s)
         {

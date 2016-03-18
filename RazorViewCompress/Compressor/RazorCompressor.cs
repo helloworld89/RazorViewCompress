@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace RazorViewCompress
 {
-    public class RazorCompressor : BaseCompressor
+    internal class RazorCompressor : BaseCompressor
     {
         public override string RemoveWhiteSpaces(string fileContent)
         {

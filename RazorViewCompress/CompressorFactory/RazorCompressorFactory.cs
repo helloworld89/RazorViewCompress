@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace RazorViewCompress
+﻿namespace RazorViewCompress
 {
-    public class RazorCompressorFactory : ICompressorFactory
+    internal class RazorCompressorFactory : ICompressorFactory
     {
         public BaseCompressor CreateCompressor()
         {

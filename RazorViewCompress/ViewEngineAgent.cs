@@ -1,27 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
 namespace RazorViewCompress
 {
     internal class ViewEngineAgent : IViewEngine
     {
-        private readonly IViewEngine _innerViewEngine;
+        private readonly IViewEngine _razorViewEngine;
+
         public ViewEngineAgent()
         {
-            _innerViewEngine = new RazorViewEngine();
+            _razorViewEngine = new RazorViewEngine();
         }
+
         public ViewEngineResult FindPartialView(ControllerContext controllerContext, string partialViewName, bool useCache)
         {
             partialViewName = RazorCompressHelper.GetCompressedViewName(controllerContext, partialViewName);
 
-            var result = _innerViewEngine.FindPartialView(controllerContext, partialViewName, useCache);
+            var result = _razorViewEngine.FindPartialView(controllerContext, partialViewName, useCache);
             return result;
         }
+
         public ViewEngineResult FindView(ControllerContext controllerContext, string viewName, string masterName, bool useCache)
         {
             if (masterName != null)
@@ -31,12 +28,13 @@ namespace RazorViewCompress
             masterName = RazorCompressHelper.GetCompressedViewName(controllerContext, masterName);
             viewName = RazorCompressHelper.GetCompressedViewName(controllerContext, viewName);
 
-            var result = _innerViewEngine.FindView(controllerContext, viewName, masterName, useCache);
+            var result = _razorViewEngine.FindView(controllerContext, viewName, masterName, useCache);
             return result;
         }
+
         public void ReleaseView(ControllerContext controllerContext, IView view)
         {
-            _innerViewEngine.ReleaseView(controllerContext, view);
+            _razorViewEngine.ReleaseView(controllerContext, view);
         }
     }
 }

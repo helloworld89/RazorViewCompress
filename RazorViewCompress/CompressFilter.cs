@@ -1,17 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Web.Mvc;
 
 namespace RazorViewCompress
 {
     internal class CompressFilter : ActionFilterAttribute
     {
-        bool _zipHtml;
-        bool _removeWhiteSpace;
+        private bool _zipHtml;
+        private bool _removeWhiteSpace;
+
         public override void OnResultExecuted(ResultExecutedContext filterContext)
         {
             if (filterContext.Exception != null)
@@ -19,11 +18,13 @@ namespace RazorViewCompress
                 filterContext.HttpContext.Response.Filter = null;
             }
         }
+
         public CompressFilter(bool zipHtml, bool removeWhiteSpace)
         {
             _zipHtml = zipHtml;
             _removeWhiteSpace = removeWhiteSpace;
         }
+
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             if (_zipHtml)
@@ -48,8 +49,6 @@ namespace RazorViewCompress
 
         private void GZip(ActionExecutingContext filterContext)
         {
-
-
             var encodingsAccepted = filterContext.HttpContext.Request.Headers["Accept-Encoding"];
             if (string.IsNullOrEmpty(encodingsAccepted)) return;
 
@@ -67,6 +66,7 @@ namespace RazorViewCompress
                 response.Filter = new GZipStream(response.Filter, CompressionMode.Compress);
             }
         }
+
         private void RemoveWhiteSpaces(ActionExecutingContext filterContext)
         {
             var response = filterContext.HttpContext.Response;
@@ -79,7 +79,6 @@ namespace RazorViewCompress
             });
         }
 
-
         internal class WhiteSpaceFilter : Stream
         {
             private Stream _shrink;
@@ -91,38 +90,48 @@ namespace RazorViewCompress
                 _filter = filter;
             }
 
-
             public override bool CanRead { get { return true; } }
             public override bool CanSeek { get { return true; } }
             public override bool CanWrite { get { return true; } }
-            public override void Flush() { _shrink.Flush(); }
+
+            public override void Flush()
+            {
+                _shrink.Flush();
+            }
+
             public override long Length { get { return 0; } }
             public override long Position { get; set; }
+
             public override int Read(byte[] buffer, int offset, int count)
             {
                 return _shrink.Read(buffer, offset, count);
             }
+
             public override long Seek(long offset, SeekOrigin origin)
             {
                 return _shrink.Seek(offset, origin);
             }
+
             public override void SetLength(long value)
             {
                 _shrink.SetLength(value);
             }
+
             public override void Close()
             {
                 var s = sb.ToString();
                 s = _filter(s);
-                // write the data to stream 
+                // write the data to stream
                 byte[] outdata = Encoding.UTF8.GetBytes(s);
                 _shrink.Write(outdata, 0, outdata.GetLength(0));
                 _shrink.Close();
             }
+
             private StringBuilder sb = new StringBuilder();
+
             public override void Write(byte[] buffer, int offset, int count)
             {
-                // capture the data and convert to string 
+                // capture the data and convert to string
                 byte[] data = new byte[count];
                 Buffer.BlockCopy(buffer, offset, data, 0, count);
                 string s = Encoding.UTF8.GetString(data);
@@ -135,11 +144,10 @@ namespace RazorViewCompress
                 //}
                 //// filter the string
                 //s = _filter(s);
-                //// write the data to stream 
+                //// write the data to stream
                 //byte[] outdata = Encoding.Default.GetBytes(s);
                 //_shrink.Write(outdata, 0, outdata.GetLength(0));
             }
         }
-
     }
 }
