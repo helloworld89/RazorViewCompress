@@ -46,16 +46,18 @@
   <ItemGroup>
     <Compile Include="Compressor\BaseCompressor.cs" />
     <Compile Include="CompressConfig.cs" />
-    <Compile Include="CompressFilter.cs" />
+    <Compile Include="HtmlCompress\HtmlCompressFilter.cs" />
     <Compile Include="Compressor\HtmlCompressor.cs" />
     <Compile Include="Compressor\RazorCompressor.cs" />
     <Compile Include="CompressorFactory\HtmlCompressorFactory.cs" />
     <Compile Include="CompressorFactory\ICompressorFactory.cs" />
-    <Compile Include="RazorCompressHelper.cs" />
+    <Compile Include="RazorCompress\RazorCompressHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CompressorFactory\RazorCompressorFactory.cs" />
-    <Compile Include="ViewEngineAgent.cs" />
+    <Compile Include="RazorCompress\ViewEngineAgent.cs" />
+    <Compile Include="HtmlCompress\WhiteSpaceFilter.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

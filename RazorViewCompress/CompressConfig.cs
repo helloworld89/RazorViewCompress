@@ -13,7 +13,7 @@ namespace RazorViewCompress
             }
             if (removeWhiteSpaceInHtml || zipHtml)
             {
-                GlobalFilters.Filters.Add(new CompressFilter(zipHtml, removeWhiteSpaceInHtml));
+                GlobalFilters.Filters.Add(new HtmlCompressFilter(zipHtml, removeWhiteSpaceInHtml));
             }
         }
     }
